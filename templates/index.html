@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="user_info">
+    {% if user %}
+    <div class="user_card">
+        <h1>Профиль</h1>
+        <div class="user_name">Имя: {{ user.name }}</div>
+        <div class="user_email">Почта: {{ user.email }}</div>
+        <a href="/logout">Выйти</a>
+    </div>
+    <div class="my_groups">
+        <h1>Мои группы</h1>
+        {% if not groups %}
+            <h1>У вас пока нет групп</h1>
+        {% else %}
+            {% for group in groups %}
+            <div class="user_groups">
+                <div class="group_card">
+                    <a href="/group/{{ group.group_id }}" class="group-link">{{ group.name }}</a>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <a href="/create_group_by_user" class="link-groups">Создать группу</a>
+        </div>
+    </div>
+</div>
+<!-- {% else %}
+<div></div>
+<p>Вы не авторизованны</p>
+<div class="nav">
+    <a href="/login">Войти</a>
+    <a href="/register">Зарегистрироваться</a>
+</div> -->
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="participants">
+    {% for participant in group.participants %}
+    <div class="participant">{{ participant }}</div>
+    <a href="/add_participant">Добавить участника</a>
+    <a href="/remove_participant">Удалить участника</a>
+    <button type="submit">Поменять название группы</button>
+    {% endfor %}
+</div>
+<div class="who_pays">
+    <h4>В этот раз платит: {{ payer }}</h4>    
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="register_first_layer">
+    <div class="register_second_layer">
+        <h1 class="h-register">Вход</h1>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="email" name="email" placeholder="Email" required><br>
+            <input type="password" name="password" placeholder="Пароль" required><br>
+        </form>
+        <button type="submit" class="but-r">Войти</button>
+
+        <div class="nav_main">
+            Нет аккаунта? <a href="/register" class="link-login">Зарегистрироваться</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

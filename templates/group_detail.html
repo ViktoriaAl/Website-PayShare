@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="group_page">
+    <div class="group_info">
+        <h2>{{ group.name }}</h2>
+        <div class="general_info">
+            <p>Владелец: {{ group.owner.name }}</p>
+            <p>Количество участников: {{ number_of_members }}</p>
+        </div>
+
+        <h2>Участники</h2>
+        <div class="member_list">
+            {% for member in members %}
+            <div class="member_card">
+                <span>{{ member.name }}</span>
+                {% if group.owner_id == user.user_id and member.user_id != user.user_id %}
+                <form method="POST" action="/remove_participant" style="display: inline;">
+                    <input type="hidden" name="group_id" value="{{ group.group_id }}"><br>
+                    <input type="hidden" name="participan_email" value="{{ member.email }}"><br>
+                    <button type="submit" class="remove-btn">Удалить</button>
+                </form>
+            {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if group.owner_id == user.user_id %}
+        <div class="add_member">
+            <h2>Добавить участника</h2>
+            {% if add_error %}
+            <div class="error">{{ add_error }}</div>
+            {% endif %}
+            {% if add_success %}
+            <div class="success">{{ add_success }}</div>
+            {% endif %}
+            {% if remove_error %}
+            <div class="error">{{ remove_error }}</div>
+            {% endif %}
+            {% if remove_success %}
+            <div class="success">{{ remove_success }}</div>
+            {% endif %}
+
+            <form method="POST" action="/add_participant">
+                <input type="hidden" name="group_id" value="{{ group.group_id }}">
+                <input type="email" name="participan_email" placeholder="Email пользователя" required>
+                <button type="submit">Добавить</button>
+            </form>
+
+        </div>
+        {% endif %}
+        <div class="nav_add">
+            <a href="/">На главную</a>
+        </div>
+    </div>
+
+    <div class="who_pays">
+        <h2>В этот раз платит: {{ payer }}</h2>    
+    </div>
+
+    <button id="openBtnModal" class="choose-who-pays">выбрать</button>
+    <div id="choosePerson" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>выбрать</h3>
+            <form id="choosePersonForm" method="POST" action="/person_who_pays">
+                <input type="hidden" name="group_id" value="{{ group.group_id }}"><br>
+                <input type="name" name="participan_name" placeholder="Имя пользователя" required><br>
+                <div class="modal-buttons">
+                    <button type="submit" class="modal-btn-submit">принять</button>
+                    <a href="/" class="modal-btn-choose">выбрать рандомно/по балансу</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    var modal = document.getElementById("choosePerson")
+    var openBtn = document.getElementById("openBtnModal")
+    var closeSpan = document.getElementsByClassName("close-modal")[0]
+    var chooseBtn = document.getElementById("openBtnModal")
+    var form = document.getElementById("openBtnModal")
+</script>
+
+{% endblock %}
