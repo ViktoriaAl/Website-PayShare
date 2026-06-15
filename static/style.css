@@ -23,6 +23,21 @@ body {
     /* text-align: left; */
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    /* z-index: 1000; */
+    /* left: 10px; */
+    top: 45px;
+    /* width: 100%;
+    height: 100%; */
+    background-color: rgb(242, 240, 242);
+}
+
+.modal-buttons {
+    background-color: #1e1e1e;
+}
+
 h1 {
     color: #333;
     text-align: center;
@@ -62,6 +77,16 @@ p {
     margin: 0 10px 20px 0;
     font-size: 15px;
     font-style: normal;
+}
+
+span {
+    color: #a8a8a8;
+    text-align: left;
+}
+
+.close-modal {
+    color: #a8a8a8;
+    text-align: left;
 }
 
 form {
@@ -122,6 +147,24 @@ button:hover {
     padding: 0;
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.choose-who-pays {
+    background: none;
+    color: #e0e0e0;
+    padding: 0;
+}
+
+.modal-btn-submit {
+    background: none;
+    color: #e0e0e0;
+    padding: 0;
+}
+
+.modal-btn-choose {
+    background: none;
+    color: #e0e0e0;
+    padding: 0;
 }
 
 a {
@@ -363,8 +406,10 @@ a:hover {
 
 .who_pays {
     display: flex;
-    justify-content: left;
-    width: 300px;
+    flex-direction: column;
+    /* justify-content: left; */
+    /* width: 300px; */
     margin-top: 10px;
     margin-left: 15px;
 }
+
