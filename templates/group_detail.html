@@ -24,7 +24,7 @@
                 </form>
             {% endif %}
             </div>
-            {% endfor %}
+            {% endfor %}?
         </div>
 
         {% if group.owner_id == user.user_id %}
@@ -35,6 +35,111 @@
             {% endif %}
             {% if add_success %}
             <div class="success">{{ add_success }}</div>
+            {% endif %}
+            {% if remove_error %}
+            <div class="error">{{ remove_error }}</div>
+            {% endif %}
+            {% if remove_success %}
+            <div class="success">{{ remove_success }}</div>
+            {% endif %}
+
+            <form method="POST" action="/add_participant">
+                <input type="hidden" name="group_id" value="{{ group.group_id }}">
+                <input type="email" name="participant_email" placeholder="Email пользователя" required>
+                <button type="submit">Добавить</button>
+            </form>
+
+        </div>
+        {% endif %}
+        <div class="nav_add">
+            <a href="/">На главную</a>
+        </div>
+    </div>
+
+    <div class="who_pays">
+        {% if payer and payer != "Нет участников" %}
+            <h2>В этот раз платит: {{ payer }}</h2>
+            <button id="openBtnModal2" class="choose-who-pays">добавить счёт</button>
+        {% else %}
+            <h2>В этот раз платит: не выбран</h2>
+            <button id="openBtnModal" class="choose-who-pays">выбрать</button>
+        {% endif %}
+    
+        <div id="choosePerson" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <form id="choosePersonForm" method="POST" action="/person_who_pays">
+                    <input type="hidden" name="group_id" value="{{ group.group_id }}"><br>
+                    <input type="name" name="participan_name" placeholder="Имя пользователя" required><br>
+                    <div class="modal-buttons">
+                        <button type="submit" class="modal-btn-submit">принять</button>
+                        <a href="/choose_participant/{{ group.group_id }}" class="modal-btn-choose">выбрать рандомно/по балансу</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="addPayment" class="modal">
+            <div class="modal-content">
+                <span class="close-modal2">&times;</span>
+                <form id="addPaymentForm" method="POST" action="/add_payment">
+                    <input type="hidden" name="group_id" value="{{ group.group_id }}"><br>
+                    <input type="name" name="payment" placeholder="Суммв счёта" required><br>
+                    <button type="submit" class="modal-btn-submit">принять</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function setupModal(openBtnId, closeClass, ModalEl) {
+        var openBtn = document.getElementById("openBtnId");
+        var closeBtn = document.getElementsByClassName("closeClass")[0];
+
+        if (openBtn) {
+            openBtn.onclick = function() {
+                ModalEl.style.display = "block";
+            }   
+        }
+
+        if (closeBtn) {
+        closeBtn.onclick = function() {
+                ModalEl.style.display = "none";
+            }
+    }
+    }
+
+
+    var choosePersonModal = document.getElementById("choosePerson");
+    var addPaymentModal = document.getElementById("addPayment");
+
+    setupModal("openBtnModal", "close-modal", choosePersonModal);
+    setupModal("openBtnModal2", "close-modal2", addPaymentModal);
+
+    var chooseBtn = document.querySelector(".modal-btn-choose");
+
+    if (chooseBtn) {
+        chooseBtn.onclick = function(e) {
+            e.preventDefault();
+
+            var groupID = document.querySelector('input[name="group_id"]').value;
+            window.location.href = '/choose_participant/' + groupID;
+        }
+    }
+
+    window.onclick = function(event) {
+        [choosePersonModal, addPaymentModal].forEach(function(modal) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+    }
+
+</script>
+
+{% endblock %}            <div class="success">{{ add_success }}</div>
             {% endif %}
             {% if remove_error %}
             <div class="error">{{ remove_error }}</div>
