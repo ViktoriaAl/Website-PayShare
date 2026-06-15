@@ -1,7 +1,18 @@
 from flask import Flask, request, redirect, make_response, render_template
 from database import User, SessionToken, db_session
 from login_user import get_user_by_token
-from creating_groups import create_group, add_participant, remove_participant, is_user_in_group, get_user_groups, get_group_by_id, get_group_members
+from creating_groups import (
+    create_group, 
+    add_participant, 
+    remove_participant, 
+    is_user_in_group, 
+    get_user_groups, 
+    get_group_by_id, 
+    get_group_members,
+    select_payer,
+    set_payer_by_name,
+    add_payment
+)
 
 from datetime import datetime
 import secrets
@@ -93,6 +104,28 @@ def create_group_by_user():
         return render_template('create_group.html', error=None, success=f"Группа {group_name} успешно создана")
     return render_template('create_group.html', error=result, success=None)
 
+
+def render_group_page(user, group_id, **extra):
+    group = get_group_by_id(db_session, group_id)
+    members = get_group_members(db_session, group_id)
+    payer_name = group.current_payer.name if group.current_payer else None
+
+    context = dict(
+        user=user,
+        group=group,
+        members=members,
+        number_of_members=len(members),
+        payer=payer_name,
+        add_error=None,
+        add_success=None,
+        remove_error=None,
+        remove_success=None
+    )
+
+    context.update(extra)
+    return render_template('group_detail.html', **context)
+
+
 @app.route('/group/<int:group_id>')
 def group_page(group_id):
     user = get_current_user_from_request()
@@ -106,18 +139,9 @@ def group_page(group_id):
     if not is_user_in_group(db_session, group_id, user.user_id):
         return "У вас нет доступа к этой группе", 403
     
-    members = get_group_members(db_session, group_id)
+    return render_group_page(user, group_id)
 
-    
-    return render_template('group_detail.html',
-                           user=user,
-                           group=group,
-                           members=members,
-                           number_of_members=len(members),
-                           add_error=None,
-                           add_success=None,
-                           remove_error=None,
-                           remove_success=None)
+
     
 @app.route('/add_participant', methods=['POST'])
 def add_member():
@@ -131,29 +155,9 @@ def add_member():
         return redirect(f'/group/{group_id}')
     success, message = add_participant(db_session, user.user_id, participant_email, group_id)
 
-    group = get_group_by_id(db_session, group_id)
-    members = get_group_members(db_session, group_id)
-
     if success:
-        return render_template('group_detail.html',
-                           user=user,
-                           group=group,
-                           members=members,
-                           number_of_members=len(members),
-                           add_error=None,
-                           add_success=message,
-                           remove_error=None,
-                           remove_success=None)
-    
-    return render_template('group_detail.html',
-                           user=user,
-                           group=group,
-                           members=members,
-                           number_of_members=len(members),
-                           add_error=message,
-                           add_success=None,
-                           remove_error=None,
-                           remove_success=None)
+        return render_group_page(user, group_id, add_success=message)
+    return render_group_page(user, group_id, add_error=message)
 
 @app.route('/remove_participant', methods=['POST'])
 def remove_member():
@@ -167,27 +171,24 @@ def remove_member():
         return redirect(f'/group/{group_id}')
     success, message = remove_participant(db_session, user.user_id, participant_email, group_id)
 
-    group = get_group_by_id(db_session, group_id)
-    members = get_group_members(db_session, group_id)
-
     if success:
-        return render_template('group_detail.html',
-                           user=user,
-                           group=group,
-                           members=members,
-                           add_error=None,
-                           add_success=None,
-                           remove_error=None,
-                           remove_success=message)
-    
-    return render_template('group_detail.html',
-                           user=user,
-                           group=group,
-                           members=members,
-                           add_error=None,
-                           add_success=None,
-                           remove_error=message,
-                           remove_success=None)
+        return render_group_page(user, group_id, remove_success=message)
+    return render_group_page(user, group_id, remove_error=message)
+
+@app.route('/choose_participant/<int:group_id>', methods=['GET', 'POST'])
+def choose_participant(group_id):
+    user = get_current_user_from_request()
+    if not user:
+        return redirect('/login')
+
+    participant_name = request.form.get('participant_name') if request.method == 'POST' else None
+
+    if participant_name:
+        set_payer_by_name(db_session, group_id, participant_name)
+    else:
+        select_payer(db_session, group_id)
+
+    return render_group_page(user, group_id)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
