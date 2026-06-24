@@ -7,8 +7,10 @@
 <div class="register_first_layer">
     <div class="register_second_layer">
         <h1 class="h-register">Регистрация</h1>
-        {% if error %}
-        <div class="error">{{ error }}</div>
+        {% if success %}
+        <div class="success">{{ message }}</div>
+        {% else %}
+        <div class="error">{{ message }}</div>
         {% endif %}
         <form method="POST">
             <input type="text" name="name" placeholder="Имя" required><br>
