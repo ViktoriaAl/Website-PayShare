@@ -3,17 +3,23 @@
 {% block title %}Создание группы{% endblock %}
 
 {% block content %}
-<h1>Создать группу</h1>
-{% if error %}
-<div class="error">{{ error }}</div>
-{% else %}
-<div class="success">{{ success }}</div>
-{% endif %}
-<form method="POST">
-    <input type="text" name="group_name" placeholder="Название группы" required><br>
-    <button type="submit">Создать группу</button>
-</form>
-<div class="nav_add">
-    <a href="/">На главную</a>
+
+<div class="register_first_layer">
+    <div class="register_second_layer">
+        <h1 class="h-register">Создать группу</h1>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+        <div class="success">{{ success }}</div>
+        {% endif %}
+        <form method="POST">
+            <input type="text" name="group_name" placeholder="Название группы" required><br>
+            <button type="submit">Создать группу</button>
+        </form>
+        <div class="nav_main">
+            <a href="/" class="link-login">На главную</a>
+        </div>
+    </div>
 </div>
 {% endblock %}
