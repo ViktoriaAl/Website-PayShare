@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Table
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, DateTime, Table
 from sqlalchemy.orm import declarative_base, Session, relationship
 
 from datetime import datetime
@@ -21,6 +21,10 @@ class User(Base):
     email = Column(String)
 
     password_hash = Column(String)
+
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String, nullable=True)
+    verification_sent_at = Column(DateTime, nullable=True)
 
     owned_groups = relationship("Group", back_populates="owner", foreign_keys="Group.owner_id")
     member_of_groups = relationship("Group", secondary=group_members, back_populates="participants")
@@ -51,33 +55,6 @@ class UserGroupBank(Base):
 
     user = relationship("User", back_populates="user_bank")
     group = relationship("Group", back_populates="participants_bank")
-
-class SessionToken(Base):
-    __tablename__ = 'session'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("user_info.user_id"))
-
-    token = Column(String, unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.now)
-    expires_at = Column(DateTime)
-
-Base.metadata.create_all(engine)
-db_session = Session(engine)
-
-        participants = relationship("User", secondary=group_members, back_populates="member_of_groups")
-    participant_bank = relationship("UserGroupBank", back_populates="group")
-
-class UserGroupBank(Base):
-    __tablename__ = 'user_group_bank'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("user_info.user_id"))
-    group_id = Column(Integer, ForeignKey("groups_info.group_id"))
-    balance = Column(Integer, default=0)
-
-    user = relationship("User", back_populates="participant_bank")
-    group = relationship("Group", back_populates="user_bank")
 
 class SessionToken(Base):
     __tablename__ = 'session'
