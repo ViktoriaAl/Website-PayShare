@@ -14,6 +14,9 @@ from creating_groups import (
     add_payment
 )
 
+from login_user import register as register_user
+from login_user import creating_verification
+
 from datetime import datetime
 import secrets
 
@@ -48,16 +51,22 @@ def register_page():
     email = request.form['email']
     password = request.form['password']
 
-    from login_user import register as register_user
     success, result = register_user(db_session, name, email, password)
-    if success:
-        response = make_response(redirect('/'))
+    # if success:
+    #     # response = make_response(redirect('/login'))
+    #     # # token = result
+    #     # # response.set_cookie('session_token', token, max_age=86400, httponly=True)
+    #     # return response
 
-        token = result
-        response.set_cookie('session_token', token, max_age=86400, httponly=True)
-        return response
-    else:
-        return render_template('register.html', error=result, name=name, email=email)
+    # else:
+    return render_template('register.html', success=success, message=result, name=name, email=email)
+    
+@app.route('/verify/<token>')
+def verify(token):
+    from login_user import verify_user_email
+    success, result = verify_user_email(db_session, token)
+    return render_template('verify_result.html', success=success, message=result)
+
         
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -69,6 +78,9 @@ def login():
 
     from login_user import login as login_user
     success, result = login_user(db_session, email, password)
+    # if success is None:
+    #     return render_template('login.html', error="Ваш email не был подтвержден", email=None)
+
     if success:
         response = make_response(redirect('/'))
 
@@ -170,6 +182,7 @@ def remove_member():
     if not participant_email:
         return redirect(f'/group/{group_id}')
     success, message = remove_participant(db_session, user.user_id, participant_email, group_id)
+    # group = 
 
     if success:
         return render_group_page(user, group_id, remove_success=message)
@@ -189,6 +202,40 @@ def choose_participant(group_id):
         select_payer(db_session, group_id)
 
     return render_group_page(user, group_id)
+
+@app.route('/add_payment', methods=['POST'])
+def add_payment_route():
+    user = get_current_user_from_request()
+    if not user:
+        return redirect('/login')
+    
+    group_id = int(request.form.get('group_id'))
+    payment_raw = request.form.get('payment')
+
+    try:
+        amount = float(payment_raw)
+    except (TypeError, ValueError):
+        amount = None
+    
+    if amount is not None:
+        add_payment(db_session, group_id, amount)
+    
+        group = get_group_by_id(db_session, group_id)
+        group.current_payer = None
+
+        db_session.commit()
+
+    members = get_group_members(db_session, group_id)
+    return render_template("group_detail.html", user=user,
+            group=group,
+            members=members,
+            number_of_members=len(members),
+            add_error=None,
+            add_success=None,
+            remove_error=None,
+            remove_success=None)
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
